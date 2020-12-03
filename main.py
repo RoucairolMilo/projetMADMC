@@ -84,8 +84,13 @@ def QuickLexicoSort(l, ordre = (0, 1)) :
         return l
     return l
 
-def lexicoDominance(s) :
-    l = QuickLexicoSort(list(s))
+def lexicoDominance(L) :
+    """
+
+    :param L: Un array de vecteurs
+    :return: le front de pareto de cet ensemble en minimisation
+    """
+    l = QuickLexicoSort(L)
     #un vecteur n'est pas dominé ssi sa seconde composante est inférieure au minimum des secondes composantes croisées jusque là
     #ne marche de cette manière que pour le bicritère
     min = l[0][1]
@@ -97,27 +102,31 @@ def lexicoDominance(s) :
     return dom
 
 #question 7
-def setAdd(s, i):
-    newS = set()
-    for e in s :
-        newS.add(e+i)
-    return newS
-
 def dynaMOSS(k, n, l) :
     if(k == 0) :
-        return {np.zeros(2)}
-    return lexicoDominance(setAdd(dynaMOSS(k-1, n-1, l), l[n]) | dynaMOSS(k, n-1, l))
+        return np.array(np.zeros(2))
+    return lexicoDominance( np.unique(np.concatenate( dynaMOSS(k-1, n-1, l) + l[n],  dynaMOSS(k, n-1, l) )))
 
 #question 8
-
 def f(I, y) :
+    """
+
+    :param I: les deux valeurs de alpha
+    :param y: y
+    :return: fI(y)
+    """
     return max(y[0]*I[0]+(1-I[0])*y[1], y[0]*I[1]+(1-I[1])*y[1])
 
-def minimaxEns(s, I) :
-    l = list(s)
+def minimaxEns(l, I) :
+    """
+
+    :param l: un array de vecteurs
+    :param I: les deux valeurs de alpha
+    :return: le point minimax de l selon I
+    """
     min = f(I,l[0])
     minel = l[0]
-    for i in s :
+    for i in l :
         val = f(I, i)
         if val < min :
             min = val
@@ -126,7 +135,6 @@ def minimaxEns(s, I) :
 
 
 #question 9
-def procDeuxTemps(s, k, n, I) :
-    pareto = dynaMOSS(k, n, list(s))
+def procDeuxTemps(l, k, n, I) :
+    pareto = dynaMOSS(k, n, l)
     return minimaxEns(pareto, I)
-
