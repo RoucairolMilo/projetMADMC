@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#question 2
 def generateNormalVectors(n, m) :
     """
     :param n: nombre de vecteurs à générer
@@ -12,6 +13,7 @@ def generateNormalVectors(n, m) :
         vec.append(np.random.normal(m, m/4, 2))
     return vec
 
+#question 3
 def compareMin(compared, comparison) :
     """
     :param compared: un vecteur de flottants ou d'entiers ou quoi que ce soit tant qu'il y a un ordre
@@ -31,7 +33,6 @@ def compareMin(compared, comparison) :
         return "dominates"
     else :
         return "neither"
-
 
 def naiveDominance(s) :
     """
@@ -54,6 +55,7 @@ def naiveDominance(s) :
             domine.add(i)
     return domine
 
+#question 4
 def lexicomp(v, w, ordre = (0, 1)) :
     for i in ordre :
         if v[i] < w[i] :
@@ -87,16 +89,44 @@ def lexicoDominance(s) :
     #un vecteur n'est pas dominé ssi sa seconde composante est inférieure au minimum des secondes composantes croisées jusque là
     #ne marche de cette manière que pour le bicritère
     min = l[0][1]
-    dom = []
+    dom = set()
     for i in l :
         if i[1] < min :
             min = i[1]
-            dom.append(i)
+            dom.add(i)
     return dom
 
+#question 7
+def setAdd(s, i):
+    newS = set()
+    for e in s :
+        newS.add(e+i)
+    return newS
 
-l = generateNormalVectors(10, 1)
+def dynaMOSS(k, n, l) :
+    if(k == 0) :
+        return {np.zeros(2)}
+    return lexicoDominance(setAdd(dynaMOSS(k-1, n-1, l), l[n]) | dynaMOSS(k, n-1, l))
 
-print(l)
+#question 8
 
-print(QuickLexicoSort(l))
+def f(I, y) :
+    return max(y[0]*I[0]+(1-I[0])*y[1], y[0]*I[1]+(1-I[1])*y[1])
+
+def minimaxEns(s, I) :
+    l = list(s)
+    min = f(I,l[0])
+    minel = l[0]
+    for i in s :
+        val = f(I, i)
+        if val < min :
+            min = val
+            minel = i
+    return minel
+
+
+#question 9
+def procDeuxTemps(s, k, n, I) :
+    pareto = dynaMOSS(k, n, list(s))
+    return minimaxEns(pareto, I)
+
