@@ -1,17 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 #question 2
 def generateNormalVectors(n, m) :
     """
     :param n: nombre de vecteurs à générer
     :param m: moyenne et écart type de la loi normale
-    :return: liste de n vecteurs dont les valeurs sont tirées sur la loi normale de moyenne m et d'écart type m/4
+    :return: np array de n vecteurs dont les valeurs sont tirées sur la loi normale de moyenne m et d'écart type m/4
     """
     vec = []
     for i in range(n) :
         vec.append(np.random.normal(m, m/4, 2))
-    return vec
+    return np.array(vec)
 
 #question 3
 def compareMin(compared, comparison) :
@@ -34,26 +35,36 @@ def compareMin(compared, comparison) :
     else :
         return "neither"
 
-def naiveDominance(s) :
+def naiveDominance(s): # O(n^2), dumb (remove break for very dumb version)
+    result = []
+    for d1 in s:
+        for d2 in s:
+            if (d2 <= d1).all() and not (d2 == d1).all():
+                break
+        else: # else of the for
+            result.append(d1) # non dominated
+
+    return np.stack(result)
+
+def lessNaiveDominance(s) :
     """
     :param s: un ensemble de vecteurs à comparer
     :return: un ensemble de vecteurs pareto optimaux en minimisation
     """
-
-    domine = set()
-    for i in s :
+    domine = []
+    for i in range(len(s)) :
         neither = True
-        for d in domine :
-            res = compareMin(i, d)
-            if res == "dominates":
-                domine.add(i)
-                domine.remove(d)
-                neither = False
+        newdomine = []
+        for d in range(len(domine)) :
+            res = compareMin(s[i], domine[d])
+            if not res == "dominates":
+                newdomine.append(domine[d])
             if res == "dominated":
                 neither = False
         if neither :
-            domine.add(i)
-    return domine
+            newdomine.append(s[i])
+        domine = newdomine
+    return np.array(domine)
 
 #question 4
 def lexicomp(v, w, ordre = (0, 1)) :
@@ -94,12 +105,63 @@ def lexicoDominance(L) :
     #un vecteur n'est pas dominé ssi sa seconde composante est inférieure au minimum des secondes composantes croisées jusque là
     #ne marche de cette manière que pour le bicritère
     min = l[0][1]
-    dom = set()
+    dom = [l[0]]
     for i in l :
         if i[1] < min :
             min = i[1]
-            dom.add(i)
-    return dom
+            dom.append(i)
+    return np.array(dom)
+
+#question5
+def test() :
+    data = generateNormalVectors(100, 5)
+
+    fig, axs = plt.subplots(1, 3, figsize=(10, 5))
+    [ax.plot(*data.T, '+') for ax in axs]
+
+    optimal_lex = lexicoDominance(data)
+    optimal_dumb = naiveDominance(data)
+    optimal_less_dumb = lessNaiveDominance(data)
+    axs[0].plot(*optimal_lex.T, 'o')
+    axs[1].plot(*optimal_dumb.T, 'o')
+    axs[2].plot(*optimal_less_dumb.T, 'o')
+
+
+    plt.show()
+
+def question5() :
+    times_dumb = []
+    times_less_dumb = []
+    times_lex = []
+
+    nmax = 10000
+    for n in range(200, nmax, 200):
+        print(n)
+        data = [generateNormalVectors(n, 1000) for _ in range(50)]
+        start = time.time()
+        for i in range(len(data)):
+            optimal = lexicoDominance(data[i])
+        times_lex.append((time.time() - start) / 50)
+
+        start = time.time()
+        for i in range(len(data)):
+            optimal = naiveDominance(data[i])
+        times_dumb.append((time.time() - start) / 50)
+
+        start = time.time()
+        for i in range(len(data)):
+            optimal = lessNaiveDominance(data[i])
+        times_less_dumb.append((time.time() - start) / 50)
+
+    fig = plt.figure()
+    plt.plot(range(200, nmax, 200), times_lex, label = "lexico")
+    plt.plot(range(200, nmax, 200), times_less_dumb, label = "naif amélioré")
+    plt.plot(range(200, nmax, 200), times_dumb, label = "naif")
+    plt.xlabel("taille de l'ensemble de vecteurs")
+    plt.ylabel("temps pour déterminet le front de Pareto (s)")
+    plt.legend()
+    plt.show()
+    fig.savefig("compLexiNaif.png")
 
 #question 7
 def dynaMOSS(k, n, l) :
@@ -138,3 +200,6 @@ def minimaxEns(l, I) :
 def procDeuxTemps(l, k, n, I) :
     pareto = dynaMOSS(k, n, l)
     return minimaxEns(pareto, I)
+
+#test()
+question5()
