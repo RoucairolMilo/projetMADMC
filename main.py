@@ -201,5 +201,40 @@ def procDeuxTemps(l, k, n, I) :
     pareto = dynaMOSS(k, n, l)
     return minimaxEns(pareto, I)
 
+
+# question 11
+
+def testIdom() :
+    data = generateNormalVectors(100, 5)
+
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    [ax.plot(*data.T, '+') for ax in axs]
+
+    optimal_lex = lexicoDominance(data)
+    optimal_I = procIdom(data, 0.00001, 0.99999)
+    axs[0].plot(*optimal_lex.T, 'o')
+    axs[1].plot(*optimal_I.T, 'o')
+    plt.show()
+
+def procIdom(points, amin, amax) :
+    #on prend les points et on les transforme pour la pareto dominance :
+    pointsBis = []
+
+    for p in points :
+        pointsBis.append(np.array([p[0]*amin + p[1]*(1-amin), p[0]*amax + p[1]*(1-amax)]))
+    #on détermine les points pareto optimaux avec l'approche lexicographique :
+    Pareto = lexicoDominance(np.array(pointsBis))
+
+    #on transforme le front de pareto pour le mettre ans l'espace voulu
+    Idom = []
+    for p in Pareto :
+        y1 = (p[1] - p[0]*(1-amax)/(1-amin))/amax * amax*(1-amin)/ (amax*(1-amin) + amin * (1- amax))
+        y2 = (p[0] - p[1]*amin/amax)/(1-amin) * ((1-amin)*amax/((1-amin)*amax - (1-amax) * amin))
+        Idom.append(np.array([y1, y2]))
+    print(Idom)
+    return np.array(Idom)
+
+
 #test()
-question5()
+#question5()
+testIdom()
