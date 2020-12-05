@@ -339,8 +339,8 @@ def question12() :
 
 
 #test()
+#testIdom()
 
-for i in range(10) :
-    testIdom()
-
+question5()
+#question5(brk = False) #décommentez pour utiliser une version naive en O(n^2), attention c'est très très long (plus de 10h)
 question12()
