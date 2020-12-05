@@ -38,11 +38,14 @@ def compareMin(compared, comparison) :
 def naiveDominance(s): # O(n^2), dumb (remove break for very dumb version)
     result = []
     for d1 in s:
+        add = True
         for d2 in s:
             if (d2 <= d1).all() and not (d2 == d1).all():
-                break
+                add = False
+                #break
         else: # else of the for
-            result.append(d1) # non dominated
+            if add :
+                result.append(d1) # non dominated
 
     return np.stack(result)
 
@@ -158,7 +161,7 @@ def question5() :
     plt.plot(range(200, nmax, 200), times_less_dumb, label = "naif amélioré")
     plt.plot(range(200, nmax, 200), times_dumb, label = "naif")
     plt.xlabel("taille de l'ensemble de vecteurs")
-    plt.ylabel("temps pour déterminet le front de Pareto (s)")
+    plt.ylabel("temps pour déterminer le front de Pareto (s)")
     plt.legend()
     plt.show()
     fig.savefig("compLexiNaif.png")
@@ -236,5 +239,5 @@ def procIdom(points, amin, amax) :
 
 
 #test()
-#question5()
-testIdom()
+question5()
+#testIdom()
