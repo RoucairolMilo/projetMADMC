@@ -35,14 +35,15 @@ def compareMin(compared, comparison) :
     else :
         return "neither"
 
-def naiveDominance(s): # O(n^2), dumb (remove break for very dumb version)
+def naiveDominance(s, brk = True): # O(n^2), dumb (remove break for very dumb version)
     result = []
     for d1 in s:
         add = True
         for d2 in s:
             if (d2 <= d1).all() and not (d2 == d1).all():
                 add = False
-                #break
+                if brk :
+                    break # sans le break, on atteint les tailles 5000 en 10h environ
         else: # else of the for
             if add :
                 result.append(d1) # non dominated
@@ -132,12 +133,16 @@ def test() :
 
     plt.show()
 
-def question5() :
+def question5(brk = True) :
     times_dumb = []
     times_less_dumb = []
     times_lex = []
 
     nmax = 10000
+
+    if not brk :
+        nmax = 2000
+
     for n in range(200, nmax, 200):
         print(n)
         data = [generateNormalVectors(n, 1000) for _ in range(50)]
@@ -148,7 +153,7 @@ def question5() :
 
         start = time.time()
         for i in range(len(data)):
-            optimal = naiveDominance(data[i])
+            optimal = naiveDominance(data[i], brk = brk)
         times_dumb.append((time.time() - start) / 50)
 
         start = time.time()
