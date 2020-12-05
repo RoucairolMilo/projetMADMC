@@ -36,6 +36,10 @@ def compareMin(compared, comparison) :
         return "neither"
 
 def naiveDominance(s, brk = True): # O(n^2), dumb (remove break for very dumb version)
+    """
+    :param s: un ensemble de vecteurs à comparer
+    :return: un ensemble de vecteurs pareto optimaux en minimisation
+    """
     result = []
     for d1 in s:
         add = True
@@ -52,6 +56,7 @@ def naiveDominance(s, brk = True): # O(n^2), dumb (remove break for very dumb ve
 
 def lessNaiveDominance(s) :
     """
+    version raté de la dominance naive
     :param s: un ensemble de vecteurs à comparer
     :return: un ensemble de vecteurs pareto optimaux en minimisation
     """
@@ -72,6 +77,12 @@ def lessNaiveDominance(s) :
 
 #question 4
 def lexicomp(v, w, ordre = (0, 1)) :
+    """
+    :param v: vecteur (arraylist)
+    :param w: vecteur (arraylist)
+    :param ordre: tuple, liste ou vecteur de taille inférieure ou égale à calle de v et w
+    :return: comparaison lexicographique de v à w
+    """
     for i in ordre :
         if v[i] < w[i] :
             return "inf"
@@ -81,6 +92,11 @@ def lexicomp(v, w, ordre = (0, 1)) :
 
 
 def QuickLexicoSort(l, ordre = (0, 1)) :
+    """
+    :param l: un array de vecteurs correspondant aux points
+    :param ordre: un tuple de taille inférieure ou égale à celle des points
+    :return: le tri lexicographique des points selon l'ordre donné
+    """
     less = []
     equal = []
     greater = []
@@ -102,7 +118,6 @@ def QuickLexicoSort(l, ordre = (0, 1)) :
 
 def lexicoDominance(L) :
     """
-
     :param L: Un array de vecteurs
     :return: le front de pareto de cet ensemble en minimisation
     """
@@ -119,6 +134,10 @@ def lexicoDominance(L) :
 
 #question5
 def test() :
+    """
+    teste les fonctions de détermination de front de pareto graphiquement
+    :return: none
+    """
     data = generateNormalVectors(100, 5)
 
     fig, axs = plt.subplots(1, 3, figsize=(10, 5))
@@ -173,7 +192,22 @@ def question5(brk = True) :
     fig.savefig("compLexiNaif.png")
 
 #question 7
-def dynaMOSS(k, n, l) :
+dynaMOSStab = dict()
+
+def dynaMOSS(k, n, l, clear = False) :
+    global dynaMOSStab
+    """
+    :param k: nombre de vecteurs à choisir
+    :param n: nombre de vecteurs disponibles au choix
+    :param l: liste des vecteurs
+    :return: l'ensemble des images des ensembles de vecteurs de l d'indice inférieur à n de taille k Pareto optimaux (minimisation)
+    """
+
+    if clear :
+        dynaMOSStab = dict()
+
+    if (    dynaMOSStab.get((k,n), np.array([-1, -1]) ) != np.array([-1, -1])      ).any() :
+        return dynaMOSStab.get((k,n))
 
     if(k == 0) :
         return np.array([[0, 0]])
@@ -182,9 +216,13 @@ def dynaMOSS(k, n, l) :
         return np.array([[1000000, 10000000]])
     """
     if n-1 < k :
-        return dynaMOSS(k-1, n-1, l) + l[n]
+        a = dynaMOSS(k-1, n-1, l) + l[n]
+
+        return a
     #print("get : " + str(k) + " in " + str(n))
-    return lexicoDominance( np.concatenate(       (dynaMOSS(k-1, n-1, l) + l[n],  dynaMOSS(k, n-1, l)))        )
+    a = lexicoDominance( np.concatenate(       (dynaMOSS(k-1, n-1, l) + l[n],  dynaMOSS(k, n-1, l)))        )
+    dynaMOSStab[(k, n)] = a
+    return a
 
 
 #question 8
@@ -215,8 +253,14 @@ def minimaxEns(l, I) :
 
 
 #question 9
-def procDeuxTemps(l, n, I) :
-    pareto = dynaMOSS(1, n, l)
+def procDeuxTemps(l, I) :
+    """
+    :param l: liste des vecteurs
+    :param I: un tuple contenant alphamin et alphamax
+    :return: le point minimax de l
+    """
+    n = len(l)-1
+    pareto = dynaMOSS(1, n, l, clear = True)
     #print(pareto)
     return minimaxEns(pareto, I)
 
@@ -231,7 +275,7 @@ def testIdom() :
 
     optimal_lex = lexicoDominance(data)
     optimal_I = procIdom(data, 0.00001, 0.99999)
-    optimal_2T =  procDeuxTemps(data, 99, [0.00001, 0.99999])
+    optimal_2T =  procDeuxTemps(data, [0.00001, 0.99999])
     axs[0].plot(*optimal_lex.T, 'o')
     axs[1].plot(*optimal_I.T, 'o')
     axs[2].plot(*optimal_2T.T, 'o') # c'est normal si il y a qu'un seul point, c'est que c'est le minimax
@@ -257,6 +301,9 @@ def procIdom(points, amin, amax) :
 
 
 #question 12
+# j'ai pas compris à quoi k servait
+# TODO : k sert à quoi ?
+
 
 def question12() :
     times_2T = []
@@ -269,10 +316,10 @@ def question12() :
         alphamin = 0.5-i
         alphamax = 0.5+i
         print(i)
-        data = [generateNormalVectors(n, 1000) for _ in range(50)]
+        data = [generateNormalVectors(n, m) for _ in range(50)]
         start = time.time()
         for i in range(len(data)):
-            optimal = procDeuxTemps(data[i], n-1, [alphamin, alphamax])
+            optimal = procDeuxTemps(data[i], [alphamin, alphamax])
         times_2T.append((time.time() - start) / 50)
 
         start = time.time()
@@ -293,6 +340,7 @@ def question12() :
 
 #test()
 
-#testIdom()
+for i in range(10) :
+    testIdom()
 
 question12()
