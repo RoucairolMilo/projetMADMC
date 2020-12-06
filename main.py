@@ -219,11 +219,11 @@ def dynaMOSS(k, n, l, clear = False) :
         return np.array([[0, 0]])
 
     if n-1 < k :
-        a = dynaMOSS(k-1, n-1, l) + l[n]
+        a = dynaMOSS(k-1, n-1, l) + l[n-1]
 
         return a
     #print("get : " + str(k) + " in " + str(n))
-    a = lexicoDominance( np.concatenate(       (dynaMOSS(k-1, n-1, l) + l[n],  dynaMOSS(k, n-1, l)))        )
+    a = lexicoDominance( np.concatenate(       (dynaMOSS(k-1, n-1, l) + l[n-1],  dynaMOSS(k, n-1, l)))        )
     dynaMOSStab[(k, n)] = a
     return a
 
@@ -256,14 +256,17 @@ def minimaxEns(l, I) :
 
 
 #question 9
-def procDeuxTemps(l, I) :
+def procDeuxTemps(l, k, I) :
     """
+
     :param l: liste des vecteurs
+    :param k: taille de l'ensemble à sélectionner
     :param I: un tuple contenant alphamin et alphamax
-    :return: le point minimax de l
+    :return: le point minimax des sous ensembles de l
     """
+
     n = len(l)-1
-    pareto = dynaMOSS(1, n, l, clear = True)
+    pareto = dynaMOSS(k, n, l, clear = True)
     #print(pareto)
     return minimaxEns(pareto, I)
 
@@ -273,32 +276,47 @@ def procDeuxTemps(l, I) :
 def testIdom() :
     data = generateNormalVectors(100, 5)
 
+    """
     fig, axs = plt.subplots(1, 3, figsize=(10, 5))
     [ax.plot(*data.T, '+') for ax in axs]
 
     optimal_lex = lexicoDominance(data)
-    optimal_I = procIdom(data, 0.00001, 0.99999)
-    optimal_2T =  procDeuxTemps(data, [0.00001, 0.99999])
+    """
+
+
+    optimal_I = procIdom(data, 10, 0.00001, 0.99999)
+    optimal_2T =  procDeuxTemps(data, 10, [0.00001, 0.99999])
+
+    print(optimal_I)
+    print(optimal_2T)
+
+    """
     axs[0].plot(*optimal_lex.T, 'o')
     axs[1].plot(*optimal_I.T, 'o')
-    axs[2].plot(*optimal_2T.T, 'o') # c'est normal si il y a qu'un seul point, c'est que c'est le minimax
+    axs[2].plot(*optimal_2T.T, 'o') # c'est normal si il y a qu'un seul point, c'est que c'est le minimax   
     plt.show()
+    """
 
-def procIdom(points, amin, amax) :
+
+def procIdom(points, k, amin, amax) :
     #on prend les points et on les transforme pour la pareto dominance :
+    #on a le droit de faire ça
     pointsBis = []
     for p in points :
         pointsBis.append(np.array([p[0]*amin + p[1]*(1-amin), p[0]*amax + p[1]*(1-amax)]))
-    #on détermine les points pareto optimaux avec l'approche lexicographique :
-    Pareto = lexicoDominance(np.array(pointsBis))
 
-    #on transforme le front de pareto pour le mettre ans l'espace voulu
+    #on détermine les points pareto optimaux avec l'approche lexicographique :
+    Pareto = dynaMOSS(k, len(points), np.array(pointsBis), clear = True)
+
+    #on transforme le front de pareto pour le mettre dans l'espace voulu
     Idom = []
     for p in Pareto :
         y1 = (p[1] - p[0]*(1-amax)/(1-amin))/amax * amax*(1-amin)/ (amax*(1-amin) + amin * (1- amax))
         y2 = (p[0] - p[1]*amin/amax)/(1-amin) * ((1-amin)*amax/((1-amin)*amax - (1-amax) * amin))
         Idom.append(np.array([y1, y2]))
     #print(Idom)
+
+
     return minimaxEns(Idom, [amin, amax])
     return np.array(Idom)
 
@@ -322,19 +340,19 @@ def question12() :
         data = [generateNormalVectors(n, m) for _ in range(50)]
         start = time.time()
         for i in range(len(data)):
-            minimax = procDeuxTemps(data[i], [alphamin, alphamax])
+            minimax = procDeuxTemps(data[i], k, [alphamin, alphamax])
         times_2T.append((time.time() - start) / 50)
 
         start = time.time()
         for i in range(len(data)):
-            minimax = procIdom(data[i], alphamin, alphamax)
+            minimax = procIdom(data[i], k, alphamin, alphamax)
         times_Idom.append((time.time() - start) / 50)
 
     fig = plt.figure()
     plt.plot( np.arange(0.025, 0.525, 0.025), times_2T, label="méthode en deux temps")
     plt.plot( np.arange(0.025, 0.525, 0.025), times_Idom, label="méthode par I-dominance")
     plt.xlabel("rayon de I centré en 0.5 dans R")
-    plt.ylabel("temps pour déterminer le front de Pareto (s)")
+    plt.ylabel("temps pour trouver le point minimax (s)")
     plt.title("comparaison de la méthode en deux temps et de la méthode par I-dominance")
     plt.legend()
     plt.show()
@@ -342,8 +360,13 @@ def question12() :
 
 
 #test()
-#testIdom()
 
-question5()
+"""
+for i in range(50) :
+    print("test :")
+    testIdom()
+    """
+
+#question5()
 #question5(brk = False) #décommentez pour utiliser une version naive en O(n^2), attention c'est très très long (plus de 10h)
 question12()
