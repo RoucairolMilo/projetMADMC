@@ -322,12 +322,12 @@ def question12() :
         data = [generateNormalVectors(n, m) for _ in range(50)]
         start = time.time()
         for i in range(len(data)):
-            optimal = procDeuxTemps(data[i], [alphamin, alphamax])
+            minimax = procDeuxTemps(data[i], [alphamin, alphamax])
         times_2T.append((time.time() - start) / 50)
 
         start = time.time()
         for i in range(len(data)):
-            optimal = procIdom(data[i], alphamin, alphamax)
+            minimax = procIdom(data[i], alphamin, alphamax)
         times_Idom.append((time.time() - start) / 50)
 
     fig = plt.figure()
