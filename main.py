@@ -37,9 +37,12 @@ def compareMin(compared, comparison) :
 
 def naiveDominance(s, brk = True): # O(n^2), dumb (remove break for very dumb version)
     """
+
     :param s: un ensemble de vecteurs à comparer
+    :param brk: laissez à True pour arreter d'étudier un point une fois qu'il est dominé, avec brk = False c'est très long
     :return: un ensemble de vecteurs pareto optimaux en minimisation
     """
+
     result = []
     for d1 in s:
         add = True
@@ -201,7 +204,10 @@ def dynaMOSS(k, n, l, clear = False) :
     :param n: nombre de vecteurs disponibles au choix
     :param l: liste des vecteurs
     :return: l'ensemble des images des ensembles de vecteurs de l d'indice inférieur à n de taille k Pareto optimaux (minimisation)
+    
+    pour trouver le front de pareto, appeler avec k = 1
     """
+
 
     if clear :
         dynaMOSStab = dict()
@@ -211,10 +217,7 @@ def dynaMOSS(k, n, l, clear = False) :
 
     if(k == 0) :
         return np.array([[0, 0]])
-    """
-        if n < k :
-        return np.array([[1000000, 10000000]])
-    """
+
     if n-1 < k :
         a = dynaMOSS(k-1, n-1, l) + l[n]
 
