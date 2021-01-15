@@ -199,25 +199,17 @@ def dynaMOSS(k, n, l, clear = False) :
     :param n: nombre de vecteurs disponibles au choix
     :param l: liste des vecteurs
     :return: l'ensemble des images des ensembles de vecteurs de l d'indice inférieur à n de taille k Pareto optimaux (minimisation)
-    
     pour trouver le front de pareto, appeler avec k = 1
     """
-
-
     if clear :
         dynaMOSStab = dict()
-
     if (    dynaMOSStab.get((k,n), np.array([-1, -1]) ) != np.array([-1, -1])      ).any() :
         return dynaMOSStab.get((k,n))
-
     if(k == 0) :
         return np.array([[0, 0]])
-
     if n-1 < k :
         a = dynaMOSS(k-1, n-1, l) + l[n-1]
-
         return a
-    #print("get : " + str(k) + " in " + str(n))
     a = lexicoDominance( np.concatenate(       (dynaMOSS(k-1, n-1, l) + l[n-1],  dynaMOSS(k, n-1, l)))        )
     dynaMOSStab[(k, n)] = a
     return a
@@ -226,7 +218,6 @@ def dynaMOSS(k, n, l, clear = False) :
 #question 8
 def f(I, y) :
     """
-
     :param I: les deux valeurs de alpha
     :param y: y
     :return: fI(y)
@@ -252,7 +243,6 @@ def minimaxEns(l, I) :
 #question 9
 def procDeuxTemps(l, k, I) :
     """
-
     :param l: liste des vecteurs
     :param k: taille de l'ensemble à sélectionner
     :param I: un tuple contenant alphamin et alphamax
@@ -261,7 +251,6 @@ def procDeuxTemps(l, k, I) :
 
     n = len(l)-1
     pareto = dynaMOSS(k, n, l, clear = True)
-    #print(pareto)
     return minimaxEns(pareto, I)
 
 
