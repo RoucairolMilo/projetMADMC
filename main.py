@@ -9,10 +9,8 @@ def generateNormalVectors(n, m) :
     :param m: moyenne et écart type de la loi normale
     :return: np array de n vecteurs dont les valeurs sont tirées sur la loi normale de moyenne m et d'écart type m/4
     """
-    vec = []
-    for i in range(n) :
-        vec.append(np.random.normal(m, m/4, 2))
-    return np.array(vec)
+    return np.random.normal(m, m / 4, (n,2))
+
 
 #question 3
 def compareMin(compared, comparison) :
@@ -37,12 +35,10 @@ def compareMin(compared, comparison) :
 
 def naiveDominance(s, brk = True): # O(n^2), dumb (remove break for very dumb version)
     """
-
     :param s: un ensemble de vecteurs à comparer
     :param brk: laissez à True pour arreter d'étudier un point une fois qu'il est dominé, avec brk = False c'est très long
     :return: un ensemble de vecteurs pareto optimaux en minimisation
     """
-
     result = []
     for d1 in s:
         add = True
@@ -54,7 +50,6 @@ def naiveDominance(s, brk = True): # O(n^2), dumb (remove break for very dumb ve
         else: # else of the for
             if add :
                 result.append(d1) # non dominated
-
     return np.stack(result)
 
 def lessNaiveDominance(s) :
@@ -240,7 +235,6 @@ def f(I, y) :
 
 def minimaxEns(l, I) :
     """
-
     :param l: un array de vecteurs
     :param I: les deux valeurs de alpha
     :return: le point minimax de l selon I
@@ -272,7 +266,6 @@ def procDeuxTemps(l, k, I) :
 
 
 # question 11
-
 def testIdom() :
     data = generateNormalVectors(100, 5)
 
@@ -322,10 +315,6 @@ def procIdom(points, k, amin, amax) :
 
 
 #question 12
-# j'ai pas compris à quoi k servait
-# TODO : k sert à quoi ?
-
-
 def question12() :
     times_2T = []
     times_Idom = []
