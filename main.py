@@ -258,26 +258,25 @@ def procDeuxTemps(l, k, I) :
 def testIdom() :
     data = generateNormalVectors(100, 5)
 
-    """
     fig, axs = plt.subplots(1, 3, figsize=(10, 5))
     [ax.plot(*data.T, '+') for ax in axs]
 
-    optimal_lex = lexicoDominance(data)
-    """
+    optimal_lex =  lexicoDominance(data)
 
+    #minimaxEns(optimal_lex, [0.2, 0.8])#
 
-    optimal_I = procIdom(data, 10, 0.00001, 0.99999)
-    optimal_2T =  procDeuxTemps(data, 10, [0.00001, 0.99999])
+    optimal_I = procIdom(data, 10, 0.45, 0.55)
+    optimal_2T =  procDeuxTemps(data, 10, [0.45, 0.55])
 
     print(optimal_I)
     print(optimal_2T)
 
-    """
+
     axs[0].plot(*optimal_lex.T, 'o')
     axs[1].plot(*optimal_I.T, 'o')
     axs[2].plot(*optimal_2T.T, 'o') # c'est normal si il y a qu'un seul point, c'est que c'est le minimax   
     plt.show()
-    """
+
 
 
 def procIdom(points, k, amin, amax) :
@@ -288,15 +287,15 @@ def procIdom(points, k, amin, amax) :
         pointsBis.append(np.array([p[0]*amin + p[1]*(1-amin), p[0]*amax + p[1]*(1-amax)]))
 
     #on détermine les points pareto optimaux avec l'approche lexicographique :
-    Pareto = dynaMOSS(k, len(points), np.array(pointsBis), clear = True)
-
+    Pareto = dynaMOSS(k, len(points)-1, np.array(pointsBis), clear = True)
     #on transforme le front de pareto pour le mettre dans l'espace voulu
     Idom = []
     for p in Pareto :
-        y1 = (p[1] - p[0]*(1-amax)/(1-amin))/amax * amax*(1-amin)/ (amax*(1-amin) + amin * (1- amax))
         y2 = (p[0] - p[1]*amin/amax)/(1-amin) * ((1-amin)*amax/((1-amin)*amax - (1-amax) * amin))
+
+        y1 = (p[1] - y2*(1-amax))/amax
+
         Idom.append(np.array([y1, y2]))
-    #print(Idom)
 
 
     return minimaxEns(Idom, [amin, amax])
@@ -320,7 +319,6 @@ def question12() :
         for i in range(len(data)):
             minimax = procDeuxTemps(data[i], k, [alphamin, alphamax])
         times_2T.append((time.time() - start) / 50)
-
         start = time.time()
         for i in range(len(data)):
             minimax = procIdom(data[i], k, alphamin, alphamax)
@@ -343,7 +341,10 @@ def question12() :
 for i in range(50) :
     print("test :")
     testIdom()
-    """
+"""
+
+
+
 
 #question5()
 #question5(brk = False) #décommentez pour utiliser une version naive en O(n^2), attention c'est très très long (plus de 10h)
